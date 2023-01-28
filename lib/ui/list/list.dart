@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pokedex_f/model/pokemon_list_item.dart';
 import 'package:pokedex_f/network/network.dart';
+import 'package:pokedex_f/ui/detail/detail.dart';
 import 'package:pokedex_f/utils/constants.dart';
 
 class ListScreen extends StatefulWidget {
@@ -35,11 +36,24 @@ class _ListScreenState extends State<ListScreen> {
             children: [
               const Text('리스트 화면'),
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 23),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 23),
                 child: Wrap(
                   spacing: 10.0,
                   runSpacing: 10.0,
-                  children: [for (var item in list) pokemonItem(item)],
+                  children: [
+                    for (var item in list)
+                      InkWell(
+                        child: pokemonItem(item),
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (BuildContext context) =>
+                                      DetailScreen(number: item.number)));
+                        },
+                      )
+                  ],
                 ),
               ),
             ],
