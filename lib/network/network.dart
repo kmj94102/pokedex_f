@@ -5,7 +5,7 @@ import 'package:pokedex_f/model/pokemon_list_item.dart';
 import 'package:pokedex_f/model/pokemon_info.dart';
 
 class NetworkUtil {
-  final baseUrl = 'https://873b-121-164-144-250.ngrok.io/';
+  final baseUrl = 'https://a38f-121-164-144-250.ngrok.io/';
 
   Future<List<PokemonListItem>> fetchPokemonList() async {
     var url = '${baseUrl}pokemons/1';
