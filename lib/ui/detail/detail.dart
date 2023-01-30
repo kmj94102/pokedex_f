@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:pokedex_f/model/compatibility.dart';
-import 'package:pokedex_f/model/status_info.dart';
-import 'package:pokedex_f/model/type_info.dart';
 import 'package:pokedex_f/network/network.dart';
 import 'package:pokedex_f/utils/constants.dart';
-import 'package:percent_indicator/percent_indicator.dart';
 
 import '../../model/pokemon_info.dart';
+import 'footer_items.dart';
 
 class DetailScreen extends StatefulWidget {
   const DetailScreen({super.key, required this.number});
@@ -42,6 +39,13 @@ class _DetailScreenState extends State<DetailScreen>
     });
   }
 
+  void _pageMove(String number) {
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (BuildContext context) => DetailScreen(number: number)));
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -50,7 +54,7 @@ class _DetailScreenState extends State<DetailScreen>
         body: Stack(
           children: [
             detailHeader(isShiny),
-            detailFooter(pokemon?.info, controller),
+            detailFooter(controller),
             detailBody(pokemon?.info, isShiny, _shinyStateChange)
           ],
         ),
@@ -67,39 +71,55 @@ class _DetailScreenState extends State<DetailScreen>
           const SizedBox(
             width: 24,
           ),
-          pokemon?.before?.dotImage == null
-              ? const SizedBox(
-                  width: 24,
-                  height: 24,
-                )
-              : SvgPicture.asset(
-                  '${imagesAddress}ic_prev.svg',
-                  width: 24,
-                  height: 24,
-                ),
-          pokemon?.before?.dotImage == null
-              ? const SizedBox(
-                  height: 42,
-                  width: 42,
-                )
-              : Image.network(
-                  isShiny
-                      ? '${pokemon?.before?.dotShinyImage}'
-                      : '${pokemon?.before?.dotImage}',
-                  errorBuilder: (
-                    BuildContext context,
-                    Object error,
-                    StackTrace? stackTrace,
-                  ) {
-                    return SvgPicture.asset(
-                      '${imagesAddress}ic_ball.svg',
-                      width: 42,
-                      height: 42,
-                    );
-                  },
-                  width: 42,
-                  height: 42,
-                ),
+          if (pokemon?.before?.dotImage == null)
+            const SizedBox(
+              width: 24,
+              height: 24,
+            )
+          else
+            GestureDetector(
+              onTap: () {
+                var number = pokemon?.before?.number;
+                if (number == null) return;
+                _pageMove(number);
+              },
+              child: SvgPicture.asset(
+                '${imagesAddress}ic_prev.svg',
+                width: 24,
+                height: 24,
+              ),
+            ),
+          if (pokemon?.before?.dotImage == null)
+            const SizedBox(
+              height: 42,
+              width: 42,
+            )
+          else
+            GestureDetector(
+              onTap: () {
+                var number = pokemon?.before?.number;
+                if (number == null) return;
+                _pageMove(number);
+              },
+              child: Image.network(
+                isShiny
+                    ? '${pokemon?.before?.dotShinyImage}'
+                    : '${pokemon?.before?.dotImage}',
+                errorBuilder: (
+                  BuildContext context,
+                  Object error,
+                  StackTrace? stackTrace,
+                ) {
+                  return SvgPicture.asset(
+                    '${imagesAddress}ic_ball.svg',
+                    width: 42,
+                    height: 42,
+                  );
+                },
+                width: 42,
+                height: 42,
+              ),
+            ),
           const Spacer(),
           Text(
             '#${pokemon?.info.number ?? '0000'}',
@@ -109,39 +129,55 @@ class _DetailScreenState extends State<DetailScreen>
                 fontSize: 24),
           ),
           const Spacer(),
-          pokemon?.after?.dotImage == null
-              ? const SizedBox(
-                  width: 42,
-                  height: 42,
-                )
-              : Image.network(
-                  isShiny
-                      ? '${pokemon?.after?.dotShinyImage}'
-                      : '${pokemon?.after?.dotImage}',
-                  errorBuilder: (
-                    BuildContext context,
-                    Object error,
-                    StackTrace? stackTrace,
-                  ) {
-                    return SvgPicture.asset(
-                      '${imagesAddress}ic_ball.svg',
-                      width: 42,
-                      height: 42,
-                    );
-                  },
-                  width: 42,
-                  height: 42,
-                ),
-          pokemon?.after?.dotImage == null
-              ? const SizedBox(
-                  width: 42,
-                  height: 42,
-                )
-              : SvgPicture.asset(
-                  'assets/images/ic_next.svg',
-                  width: 24,
-                  height: 24,
-                ),
+          if (pokemon?.after?.dotImage == null)
+            const SizedBox(
+              width: 42,
+              height: 42,
+            )
+          else
+            GestureDetector(
+              onTap: () {
+                var number = pokemon?.after?.number;
+                if (number == null) return;
+                _pageMove(number);
+              },
+              child: Image.network(
+                isShiny
+                    ? '${pokemon?.after?.dotShinyImage}'
+                    : '${pokemon?.after?.dotImage}',
+                errorBuilder: (
+                  BuildContext context,
+                  Object error,
+                  StackTrace? stackTrace,
+                ) {
+                  return SvgPicture.asset(
+                    '${imagesAddress}ic_ball.svg',
+                    width: 42,
+                    height: 42,
+                  );
+                },
+                width: 42,
+                height: 42,
+              ),
+            ),
+          if (pokemon?.after?.dotImage == null)
+            const SizedBox(
+              width: 42,
+              height: 42,
+            )
+          else
+            GestureDetector(
+              onTap: () {
+                var number = pokemon?.after?.number;
+                if (number == null) return;
+                _pageMove(number);
+              },
+              child: SvgPicture.asset(
+                'assets/images/ic_next.svg',
+                width: 24,
+                height: 24,
+              ),
+            ),
           const SizedBox(
             width: 24,
           ),
@@ -200,7 +236,7 @@ class _DetailScreenState extends State<DetailScreen>
     );
   }
 
-  Widget detailFooter(PokemonInfo? info, TabController controller) {
+  Widget detailFooter(TabController controller) {
     return Container(
       padding: const EdgeInsets.only(top: 290),
       width: double.infinity,
@@ -247,302 +283,25 @@ class _DetailScreenState extends State<DetailScreen>
               child: TabBarView(
                 controller: controller,
                 children: [
-                  info != null ? descriptionContainer(info) : const SizedBox(),
-                  info != null
-                      ? statusContainer(info)
+                  pokemon?.info != null
+                      ? descriptionContainer(pokemon!.info)
+                      : const SizedBox(),
+                  pokemon?.info != null
+                      ? statusContainer(pokemon!.info)
                       : const SizedBox(
                           child: Text('sizedBox'),
                         ),
-                  info != null
-                      ? compatibilityContainer(info.attribute)
+                  pokemon?.info != null
+                      ? compatibilityContainer(pokemon!.info.attribute)
                       : const SizedBox(),
-                  info != null ? descriptionContainer(info) : const SizedBox(),
+                  pokemon?.evolution != null
+                      ? evolutionContainer(pokemon!.evolution, isShiny)
+                      : const SizedBox(),
                 ],
               ),
             )
           ],
         ),
-      ),
-    );
-  }
-
-  Widget descriptionContainer(PokemonInfo info) {
-    TextStyle textStyle =
-        const TextStyle(fontFamily: fontMaruBuri, fontSize: 14);
-    TextStyle titleTextStyle = const TextStyle(
-        fontFamily: fontMaruBuri,
-        fontSize: 14,
-        fontWeight: FontWeight.bold,
-        color: Color(0xFFED6035));
-
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Card(
-            margin: EdgeInsets.zero,
-            elevation: 4,
-            child: Container(
-                padding: const EdgeInsets.all(7),
-                child: Text(info.description)),
-          ),
-          const SizedBox(
-            height: 13,
-          ),
-          Text(
-            '분류',
-            style: titleTextStyle,
-          ),
-          const SizedBox(
-            height: 8,
-          ),
-          Text(
-            info.characteristic,
-            style: textStyle,
-          ),
-          const SizedBox(
-            height: 13,
-          ),
-          Text(
-            '특성',
-            style: titleTextStyle,
-          ),
-          const SizedBox(
-            height: 8,
-          ),
-          Text(
-            info.classification,
-            style: textStyle,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget statusContainer(PokemonInfo info) {
-    var statusList = info.status.split(',').map((e) => int.parse(e)).toList();
-
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-      child: Column(
-        children: List.generate(StatusInfo.values.length,
-            (index) => statusBar(StatusInfo.values[index], statusList[index])),
-      ),
-    );
-  }
-
-  Widget statusBar(StatusInfo statusInfo, int status) {
-    TextStyle textStyle =
-        const TextStyle(fontFamily: fontMaruBuri, fontSize: 14);
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 5),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 1,
-            child: Text(
-              statusInfo.name,
-              style: textStyle,
-            ),
-          ),
-          Expanded(
-            flex: 7,
-            child: LinearPercentIndicator(
-              backgroundColor: const Color(0xFFD9D9D9),
-              progressColor: statusInfo.color,
-              percent: getPercent(status),
-              lineHeight: 22,
-              center: Align(
-                alignment: Alignment.centerRight,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 16.0),
-                  child: Text(
-                    '$status',
-                    style: const TextStyle(
-                        fontFamily: fontMaruBuri,
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
-                  ),
-                ),
-              ),
-              animation: true,
-              animationDuration: 1500,
-              barRadius: const Radius.circular(22),
-            ),
-          )
-        ],
-      ),
-    );
-  }
-
-  double getPercent(int status) {
-    double result = 0.1;
-    if (status / 150 > 0.1) {
-      result = status / 150;
-    }
-    return result;
-  }
-
-  Widget compatibilityContainer(String attribute) {
-    var textStyle = const TextStyle(
-        fontFamily: fontMaruBuri, fontSize: 14, fontWeight: FontWeight.bold);
-    List<TypeInfo> typeInfoList = TypeInfo.values;
-    var typeWeaknessInfoList = attribute
-        .split(',')
-        .map((e) => getTypeInfo(e).getWeaknessInfo(e))
-        .toList();
-    List<Compatibility> weaknessInfo = List.empty(growable: true);
-
-    if (typeWeaknessInfoList.isNotEmpty && typeWeaknessInfoList.length != 1) {
-      List.generate(typeWeaknessInfoList[0].length, (index) {
-        weaknessInfo.add(Compatibility(
-            type: typeInfoList[index].name,
-            compatibility: typeWeaknessInfoList[0][index] *
-                typeWeaknessInfoList[1][index]));
-      });
-    } else if (typeWeaknessInfoList.isNotEmpty) {
-      List.generate(typeWeaknessInfoList[0].length, (index) {
-        weaknessInfo.add(Compatibility(
-            type: typeInfoList[index].name,
-            compatibility: typeWeaknessInfoList[0][index]));
-      });
-    }
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          weaknessInfo.where((e) => e.compatibility == 0).toList().isNotEmpty
-              ? Container(
-                  padding: const EdgeInsets.only(bottom: 5),
-                  child: Text(
-                    '효과 없음',
-                    style: textStyle,
-                  ),
-                )
-              : const SizedBox(),
-          Wrap(
-            spacing: 5,
-            children: [
-              for (var info
-              in weaknessInfo.where((e) => e.compatibility == 0).toList())
-                Image.asset(
-                  getTypeInfo(info.type).image,
-                  width: 55,
-                  height: 55,
-                )
-            ],
-          ),
-          weaknessInfo.where((e) => e.compatibility == 4).toList().isNotEmpty
-              ? Container(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: Text(
-                    'x 4',
-                    style: textStyle,
-                  ),
-                )
-              : const SizedBox(),
-          Wrap(
-            spacing: 5,
-            children: [
-              for (var info
-                  in weaknessInfo.where((e) => e.compatibility == 4).toList())
-                Image.asset(
-                  getTypeInfo(info.type).image,
-                  width: 55,
-                  height: 55,
-                )
-            ],
-          ),
-          weaknessInfo.where((e) => e.compatibility == 2).toList().isNotEmpty
-              ? Container(
-            padding: const EdgeInsets.symmetric(vertical: 5),
-            child: Text(
-              'x 2',
-              style: textStyle,
-            ),
-          )
-              : const SizedBox(),
-          Wrap(
-            spacing: 5,
-            children: [
-              for (var info
-                  in weaknessInfo.where((e) => e.compatibility == 2).toList())
-                Image.asset(
-                  getTypeInfo(info.type).image,
-                  width: 55,
-                  height: 55,
-                )
-            ],
-          ),
-          weaknessInfo.where((e) => e.compatibility == 0.25).toList().isNotEmpty
-              ? Container(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: Text(
-                    'x 0.25',
-                    style: textStyle,
-                  ),
-                )
-              : const SizedBox(),
-          Wrap(
-            spacing: 5,
-            children: [
-              for (var info in weaknessInfo
-                  .where((e) => e.compatibility == 0.25)
-                  .toList())
-                Image.asset(
-                  getTypeInfo(info.type).image,
-                  width: 55,
-                  height: 55,
-                )
-            ],
-          ),
-          weaknessInfo.where((e) => e.compatibility == 0.5).toList().isNotEmpty
-              ? Container(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: Text(
-                    'x 0.5',
-                    style: textStyle,
-                  ),
-                )
-              : const SizedBox(),
-          Wrap(
-            spacing: 5,
-            children: [
-              for (var info
-                  in weaknessInfo.where((e) => e.compatibility == 0.5).toList())
-                Image.asset(
-                  getTypeInfo(info.type).image,
-                  width: 55,
-                  height: 55,
-                )
-            ],
-          ),
-          weaknessInfo.where((e) => e.compatibility == 1).toList().isNotEmpty
-              ? Container(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: Text(
-                    '보통 효과',
-                    style: textStyle,
-                  ),
-                )
-              : const SizedBox(),
-          Wrap(
-            spacing: 5,
-            children: [
-              for (var info
-                  in weaknessInfo.where((e) => e.compatibility == 1).toList())
-                Image.asset(
-                  getTypeInfo(info.type).image,
-                  width: 55,
-                  height: 55,
-                )
-            ],
-          ),
-        ],
       ),
     );
   }
