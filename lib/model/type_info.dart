@@ -229,3 +229,11 @@ enum TypeInfo {
 TypeInfo getTypeInfo(String type) {
   return TypeInfo.values.firstWhere((element) => element.name == type);
 }
+
+class TypeCondition {
+  TypeCondition({required this.image, required this.name});
+
+  final String image;
+  final String name;
+  bool isSelect = true;
+}

@@ -3,7 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:pokedex_f/model/pokemon_list_item.dart';
 import 'package:pokedex_f/network/network.dart';
 import 'package:pokedex_f/ui/detail/detail.dart';
+import 'package:pokedex_f/ui/list/list_drawer.dart';
 import 'package:pokedex_f/utils/constants.dart';
+import 'package:flutter_svg/svg.dart';
+
+import '../../model/type_info.dart';
 
 class ListScreen extends StatefulWidget {
   const ListScreen({Key? key}) : super(key: key);
@@ -13,7 +17,14 @@ class ListScreen extends StatefulWidget {
 }
 
 class _ListScreenState extends State<ListScreen> {
+  final GlobalKey<ScaffoldState> globalKey = GlobalKey<ScaffoldState>();
+  String searchText = "";
+  List<PokemonListItem> originalList = List.empty(growable: true);
   List<PokemonListItem> list = List.empty(growable: true);
+  List<TypeCondition> typeList = TypeInfo.values
+      .where((element) => element.name != 'unknown')
+      .map((e) => TypeCondition(image: e.image, name: e.name))
+      .toList();
 
   @override
   void initState() {
@@ -22,19 +33,93 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   void fetchPokemonList() async {
-    list = await NetworkUtil().fetchPokemonList();
+    originalList = await NetworkUtil().fetchPokemonList(searchText);
+    typeConditionChange();
     setState(() {});
+    list.forEach((element) { print(element.name);});
+  }
+
+  void typeConditionChange() {
+    setState(() {
+      list = originalList.where((element) {
+        bool result = false;
+        for (var type in element.attribute.split(',')) {
+          if (!result) {
+            result = typeList
+                .where((element) => element.isSelect)
+                .map((e) => e.name)
+                .contains(type);
+          }
+        }
+        return result;
+      }).toList();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
+      key: globalKey,
+      endDrawer: listDrawer(typeList, (index, isSelect) {
+        typeList[index].isSelect = isSelect;
+        typeConditionChange();
+      }),
       body: SingleChildScrollView(
         child: Center(
           child: Column(
             children: [
-              const Text('리스트 화면'),
+              Container(
+                padding: const EdgeInsets.only(top: 16, left: 24, right: 24),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                      child: SvgPicture.asset(
+                        '${imagesAddress}ic_prev.svg',
+                        height: 24,
+                        width: 24,
+                      ),
+                    ),
+                    const Spacer(),
+                    GestureDetector(
+                      onTap: () {
+                        globalKey.currentState?.openEndDrawer();
+                      },
+                      child: SvgPicture.asset(
+                        '${imagesAddress}ic_menu.svg',
+                        height: 24,
+                        width: 24,
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                child: TextField(
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(50.0)),
+                      borderSide: BorderSide(
+                        color: Color(0xFF299AE6)
+                      ),
+                    ),
+                    filled: true,
+                    fillColor: Color(0xFFE3F4FF),
+                    hintText: '포켓몬 검색'
+                  ),
+                  onSubmitted: (value){
+                    setState((){
+                      searchText = value;
+                    });
+                    fetchPokemonList();
+                  },
+                ),
+              ),
               Container(
                 padding:
                     const EdgeInsets.symmetric(vertical: 10, horizontal: 23),
