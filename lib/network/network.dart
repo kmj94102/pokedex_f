@@ -5,9 +5,9 @@ import 'package:pokedex_f/model/pokemon_list_item.dart';
 import 'package:pokedex_f/model/pokemon_info.dart';
 
 class NetworkUtil {
-  final baseUrl = 'https://bd68-121-164-144-250.ngrok.io/';
+  final baseUrl = 'https://0629-121-164-144-250.ngrok.io/';
 
-  Future<List<PokemonListItem>> fetchPokemonList(String searchText) async {
+  Future<List<PokemonListItem>> fetchPokemonList(String searchText, List<int> generations) async {
     var url = '${baseUrl}pokemons/search';
     http.Response response = await http.post(
         Uri.parse(url),
@@ -15,7 +15,7 @@ class NetworkUtil {
           'Content-Type': 'application/json; charset=UTF-8',
         },
       body: jsonEncode(<String, dynamic>{
-        'generations': [1, 2,],
+        'generations': generations,
         'searchText': searchText
       })
     );

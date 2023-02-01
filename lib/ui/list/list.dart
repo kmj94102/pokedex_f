@@ -25,6 +25,7 @@ class _ListScreenState extends State<ListScreen> {
       .where((element) => element.name != 'unknown')
       .map((e) => TypeCondition(image: e.image, name: e.name))
       .toList();
+  List<int> generationList = [1];
 
   @override
   void initState() {
@@ -33,10 +34,10 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   void fetchPokemonList() async {
-    originalList = await NetworkUtil().fetchPokemonList(searchText);
+    print('fetchPokemonList');
+    originalList = await NetworkUtil().fetchPokemonList(searchText, generationList);
     typeConditionChange();
     setState(() {});
-    list.forEach((element) { print(element.name);});
   }
 
   void typeConditionChange() {
@@ -56,15 +57,47 @@ class _ListScreenState extends State<ListScreen> {
     });
   }
 
+  void generationChange(int generation) {
+    setState(() {
+      if (generationList.contains(generation)) {
+        generationList.remove(generation);
+      } else {
+        generationList.add(generation);
+      }
+    });
+    fetchPokemonList();
+  }
+
+  void reset() {
+    setState((){
+      typeList = TypeInfo.values
+          .where((element) => element.name != 'unknown')
+          .map((e) => TypeCondition(image: e.image, name: e.name))
+          .toList();
+      generationList = [1];
+    });
+    fetchPokemonList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
       key: globalKey,
-      endDrawer: listDrawer(typeList, (index, isSelect) {
-        typeList[index].isSelect = isSelect;
-        typeConditionChange();
-      }),
+      endDrawer: listDrawer(
+          typeList: typeList,
+        generationList: generationList,
+        typeChangeListener: (index, isSelect) {
+          typeList[index].isSelect = isSelect;
+          typeConditionChange();
+        },
+        generationChangeListener: (generation) {
+          generationChange(generation);
+        },
+        resetListener: () {
+          reset();
+        }
+      ),
       body: SingleChildScrollView(
         child: Center(
           child: Column(
